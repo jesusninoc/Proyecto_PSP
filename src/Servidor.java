@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -72,17 +73,24 @@ public class Servidor extends JFrame implements ActionListener, Runnable {
         try {
             ServerSocket serverSocket = new ServerSocket(9999);
 
+            String nick,texto, ip;
+            Mensaje mensaje = new Mensaje();
+
+
             while (true) {
                 Socket socket = serverSocket.accept();
 
-                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+                ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+                mensaje = (Mensaje) objectInputStream.readObject();
+                nick = mensaje.getNick();
+                texto = mensaje.getTexto();
+                ip = mensaje.getIp();
 
-                String mensajeRecibido = dataInputStream.readUTF();
-                textArea.append("\n" + mensajeRecibido);
+                textArea.append("\n "+nick+": "+texto+" para "+ip);
 
                 socket.close();
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

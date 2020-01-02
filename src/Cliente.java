@@ -4,18 +4,29 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class Cliente extends JFrame implements ActionListener {
 
     Container container;
     JLabel label;
     JTextArea textArea;
-    JTextField textField;
+    JTextField textField, nick, ip;
     JButton button;
     JPanel pSuperior, pCentro, pInferior;
+    InetAddress inetAddress;
+
+    {
+        try {
+            inetAddress = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
 
     public Cliente() {
         initGUI();
@@ -45,7 +56,9 @@ public class Cliente extends JFrame implements ActionListener {
     }
 
     private JPanel configurarSuperior() {
+        pSuperior.add(nick);
         pSuperior.add(label);
+        pSuperior.add(ip);
 
         return pSuperior;
     }
@@ -72,6 +85,8 @@ public class Cliente extends JFrame implements ActionListener {
         container = this.getContentPane();
         label = new JLabel("CLIENTE");
         textField = new JTextField();
+        nick = new JTextField(10);
+        ip = new JTextField(inetAddress.toString(), 10);
         textArea = new JTextArea();
         button = new JButton("Enviar datos");
         pCentro = new JPanel();
@@ -87,10 +102,11 @@ public class Cliente extends JFrame implements ActionListener {
                 ServerSocket s = new ServerSocket(0);
                 Socket socket = new Socket(inetAddress, 9999);
 
-                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                String mensaje = textField.getText();
-                dataOutputStream.writeUTF(mensaje);
-                dataOutputStream.close();
+                Mensaje mensaje = new Mensaje(nick.getText(), textField.getText(), ip.getText());
+
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                objectOutputStream.writeObject(mensaje);
+                objectOutputStream.close();
 
             } catch (IOException ex) {
                 ex.printStackTrace();
